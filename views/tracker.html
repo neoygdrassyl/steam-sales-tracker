@@ -1,0 +1,213 @@
+{% extends "base.html" %}
+
+{% block header %}
+
+{% import 'title.html' as title %}
+{{ title.title("STEAM SALE TRACKER", "Sale price tracker for Steam games across a curated list.", "is-medium") }}
+
+{% endblock %}
+
+{% block content %}
+
+<section class="section">
+
+    {% if result == 201 %}
+    <article class="message is-success">
+        <div class="message-header">
+            <p>ITEM CREATED SUCCESSFULY</p>
+        </div>
+    </article>
+    {% endif %}
+
+    {% if result == 210 %}
+    <article class="message is-success">
+        <div class="message-header">
+            <p>ITEM UPDATED SUCCESSFULY</p>
+        </div>
+    </article>
+    {% endif %}
+
+    {% if result == 211 %}
+    <article class="message is-success">
+        <div class="message-header">
+            <p>ITEM DELETED SUCCESSFULY</p>
+        </div>
+    </article>
+    {% endif %}
+
+    {% if result == 400 %}
+    <article class="message is-danger">
+        <div class="message-header">
+            <p>AN ERROR HAS OCURRED, TRY AGAIN LATER OR CONSULT THE SYSTEM MANAGER</p>
+        </div>
+    </article>
+    {% endif %}
+
+    {% if result == 404 %}
+    <article class="message is-danger">
+        <div class="message-header">
+            <p>AN ERROR HAS OCURRED, TRY AGAIN LATER OR CONSULT THE SYSTEM MANAGER</p>
+        </div>
+    </article>
+    {% endif %}
+
+    <nav class="level">
+        <!-- Left side -->
+        <div class="level-left">
+            <div class="level-item">
+                <p class="subtitle is-5">
+                    <strong>{{ items|length}}</strong> games on list</strong>
+                </p>
+            </div>
+            <div class="level-item">
+                <div class="field has-addons">
+
+                    <p class="control">
+                        <a class="button is-success" href="/new">
+                            <span class="icon">
+                                <i class="fas fa-plus-circle"></i>
+                            </span>
+                            <span>ADD NEW</span>
+                        </a>
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right side -->
+        <div class="level-right">
+            <div class="field has-addons">
+                <div class="control">
+                    <input class="input" type="text" placeholder="Filter List" id="search-input" value="{{search}}">
+                </div>
+                <div class="control">
+                    <button class="button is-info" onclick="searchFunction()">
+                        Filter
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+</section>
+
+
+{% if items|length > 0 %}
+
+
+<section class="section">
+    <table class="table is-striped is-narrow is-hoverable">
+        <thead>
+            <tr class="is-selected">
+                <th>IMG</th>
+                <th>NAME</th>
+                <th>PRICE</th>
+                <th>SALE</th>
+                <th>DIFF_$</th>
+                <th>DIFF_%</th>
+                <th>STATUS</th>
+                <th>GENRES</th>
+                <th>LINK</th>
+                <th>ACTIION</th>
+            </tr>
+        </thead>
+
+        {% for item in items %}
+        <input type="hidden" id="item_key" value="{{item.key}}" />
+        <tr>
+            <td>
+                <div class="card">
+                    <div class="card-image">
+                        <figure class="image">
+                            <img src="{{item.img}}" alt="Game IMG">
+                        </figure>
+                    </div>
+                </div>
+                <img>
+            </td>
+            <td><strong>{{item.name}}</strong></td>
+            <td>{{ "{:,}".format(item.price, ',').replace(',', '.') }}$</td>
+            <td>{{ "{:,}".format(item.lowest, ',').replace(',', '.') }}$</td>
+            <td>-{{"{:,}".format(item.price - item.lowest, ',').replace(',', '.')}}$</td>
+            <td>{{item.lowest / item.price * 100 - 100}}%</td>
+            <td>
+                {% if item.status %}
+                <span class="tag is-success is-light"><b>OWNED</b></span>
+                {% else %}
+                <span class="tag is-danger is-light"><b>!OWNED</b></span>
+                {% endif %}
+            </td>
+            <td>
+                {% set list_genres = item.genres.split(' ') %}
+                {% for genre in list_genres %}
+                <span class="tag is-primary is-light">{{genre}}</span>
+                {% endfor %}
+            </td>
+            <td><a class="button is-info is-small" href="{{item.page}}" target="_blank">
+                    <span class="icon">
+                        <i class="fab fa-steam"></i>
+                    </span>
+                    <span>To Steam Page</span>
+                </a></td>
+            <td>
+                <div class="field has-addons">
+                    <p class="control">
+                        <a class="button is-warning is-small" href="/item/{{item.key}}">
+                            <span class="icon">
+                                <i class="far fa-edit"></i>
+                            </span>
+                        </a>
+                    </p>
+                    <p class="control">
+                        <button class="button is-danger is-small" name="{{item.key}}" onclick="deleteFunction(this)">
+                            <span class="icon">
+                                <i class="far fa-trash-alt"></i>
+                            </span>
+                        </button>
+                    </p>
+                </div>
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
+</section>
+
+{% else %}
+
+<article class="message is-warning">
+    <div class="message-header">
+        <p>NO ITEMS FOUND</p>
+    </div>
+</article>
+
+{% endif %}
+
+<script>
+    async function deleteFunction(object) {
+        let confirm_modal = prompt("Please enter password", "");
+
+        let response_modal = await fetch(`/password/${confirm_modal}`, {
+                method: 'GET',
+            });
+        
+        if (response_modal.status == 200) {
+            let key = object.name
+
+            let response = await fetch(`/delete/${key}`, {
+                method: 'DELETE',
+            });
+
+            let result = await response.json();
+
+            if (result.status == 211) window.location = `/tracker/?result=211`;
+            else window.location = `/tracker/?result=400`;
+        }
+    }
+
+    async function searchFunction() {
+        let string = document.getElementById('search-input').value
+
+        window.location = `/tracker/?search=${string}`;
+    }
+</script>
+
+{% endblock %}

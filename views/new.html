@@ -1,0 +1,203 @@
+{% extends "base.html" %}
+
+{% block header %}
+
+{% import 'title.html' as title %}
+{{ title.title("ADD NEW ITEM", "Add a new item to the list.") }}
+
+{% endblock %}
+
+{% block content %}
+
+<section class="section">
+
+    <nav class="breadcrumb" aria-label="breadcrumbs">
+        <ul>
+            <li>
+                <a href="/tracker">
+                    <span class="icon is-small">
+                        <i class="fas fa-angle-double-left"></i>
+                    </span>
+                    <span> RETURN TO LIST</span>
+                </a>
+            </li>
+            <li class="is-active">
+                <a href="#">
+                    <span class="icon is-small">
+                        <i class="fas fa-plus-circle"></i>
+                    </span>
+                    <span>ADD NEW</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+
+    <form onsubmit="return submitFunction(event)">
+        <div class="field is-horizontal">
+            <div class="field-body">
+
+                <div class="field">
+                    <label class="label">VIDEOGAME NAME</label>
+                    <div class="control has-icons-left has-icons-right">
+                        <input class="input" type="text" placeholder="Name of the videogame" value="" id="name"
+                            name="name" required>
+                        <span class="icon is-small is-left">
+                            <i class="fas fa-gamepad"></i>
+                        </span>
+                    </div>
+                </div>
+
+                <div class="field">
+                    <label class="label">GENERES</label>
+                    <div class="control has-icons-left has-icons-right">
+                        <input class="input" type="text" placeholder="Generes of the game, separate by space" value=""
+                            id="genres" name="genres">
+                        <span class="icon is-small is-left">
+                            <i class="fas fa-tags"></i>
+                        </span>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <div class="field is-horizontal">
+            <div class="field-body">
+
+                <div class="field">
+                    <label class="label">MAX PRICE</label>
+                    <div class="control has-icons-left has-icons-right">
+                        <input class="input" type="number" placeholder="Real price of the game" value="" id="price"
+                            name="price" required>
+                        <span class="icon is-small is-left">
+                            <i class="fas fa-dollar-sign"></i>
+                        </span>
+                    </div>
+                </div>
+
+                <div class="field">
+                    <label class="label">LOWER PRICE</label>
+                    <div class="control has-icons-left has-icons-right">
+                        <input class="input" type="number" placeholder="Lower all time sale price of the game" value=""
+                            id="lowest" name="lowest">
+                        <span class="icon is-small is-left">
+                            <i class="fas fa-dollar-sign"></i>
+                        </span>
+                    </div>
+                </div>
+
+                <div class="field">
+                    <label class="label">STATUS</label>
+                    <div class="control has-icons-left">
+                        <div class="select">
+                            <select name="status" id="status">
+                                <option selected value="false">NOT OWNNED</option>
+                                <option value="true">OWNNED</option>
+                            </select>
+                        </div>
+                        <div class="icon is-small is-left">
+                            <i class="fas fa-check-square"></i>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <div class="field is-horizontal">
+            <div class="field-body">
+
+                <div class="field">
+                    <label class="label">URL STEAM PAGE</label>
+                    <div class="control has-icons-left has-icons-right">
+                        <input class="input" type="text" placeholder="URL from the steam page of the game" value=""
+                            id="page" name="page">
+                        <span class="icon is-small is-left">
+                            <i class="fas fa-link"></i>
+                        </span>
+                    </div>
+                </div>
+
+                <div class="field">
+                    <label class="label">URL IMG</label>
+                    <div class="control has-icons-left has-icons-right">
+                        <input class="input" type="text"
+                            placeholder="URL from the thumbnail image of the game, from steam" value="" id="img"
+                            name="img">
+                        <span class="icon is-small is-left">
+                            <i class="fas fa-link"></i>
+                        </span>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <div class="field is-horizontal">
+            <div class="field-body">
+
+                <div class="field">
+                    <label class="label">API PASSWORD</label>
+                    <div class="control has-icons-left has-icons-right">
+                        <input class="input is-primary" type="password" placeholder="API password" value=""
+                            id="password" name="password">
+                        <span class="icon is-small is-left">
+                            <i class="fas fa-key"></i>
+                        </span>
+                    </div>
+                </div>
+
+                <div class="field"></div>
+                <div class="field"></div>
+
+            </div>
+        </div>
+
+        <button class="button is-primary" type="submit">
+            <span class="icon">
+                <i class="fas fa-plus-circle"></i>
+            </span>
+            <span>SUBMIT</span>
+        </button>
+
+    </form>
+
+</section>
+
+<script>
+
+    async function submitFunction(e) {
+        e.preventDefault();
+        let password = document.getElementById('password').value || '';
+
+        let json = {
+            name: document.getElementById('name').value || '',
+            genres: document.getElementById('genres').value || '',
+            price: document.getElementById('price').value || 0,
+            lowest: document.getElementById('lowest').value || 0,
+            status: document.getElementById('status').value || false,
+            page: document.getElementById('page').value || '',
+            img: document.getElementById('img').value || '',
+        }
+
+        let response = await fetch('/create', {
+            method: 'POST',
+            body: JSON.stringify(json),
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+                'password': password,
+            },
+        });
+
+        let result = await response.json();
+        if(result.status) window.location = `/tracker/?result=${result.status}`;
+        else  window.location = `/tracker/?result=404`;
+
+        return false;
+    }
+
+
+</script>
+
+{% endblock %}

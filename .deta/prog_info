@@ -1,0 +1,1 @@
+{"id":"c1b384af-3b8d-4c95-9dc7-0ea2d2606199","space":49793,"runtime":"python3.9","name":"fastapi","path":"xix84i","project":"e0yv5xiz","account":"144798365827","region":"sa-east-1","deps":["fastapi","python-dotenv","uvicorn","deta","Jinja2","Unidecode"],"envs":["DETA_PROJECT_KEY","API_PASS"],"public":true,"log_level":"debug","cron":""}

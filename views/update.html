@@ -1,0 +1,209 @@
+{% extends "base.html" %}
+
+{% block header %}
+
+{% import 'title.html' as title %}
+{{ title.title("UPDATE ITEM", "Update the current data of an existing game.") }}
+
+{% endblock %}
+
+{% block content %}
+
+<section class="section">
+
+    <nav class="breadcrumb" aria-label="breadcrumbs">
+        <ul>
+            <li>
+                <a href="/tracker">
+                    <span class="icon is-small">
+                        <i class="fas fa-angle-double-left"></i>
+                    </span>
+                    <span> RETURN TO LIST</span>
+                </a>
+            </li>
+            <li class="is-active">
+                <a href="#">
+                    <span class="icon is-small">
+                        <i class="far fa-edit"></i>
+                    </span>
+                    <span>UPDATE ITEM</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+
+    <form onsubmit="return submitFunction(event)">
+
+        <input type="hidden" value="{{item.key}}" id="item_key" name="item_key" />
+
+        <div class="field is-horizontal">
+            <div class="field-body">
+
+                <div class="field">
+                    <label class="label">VIDEOGAME NAME</label>
+                    <div class="control has-icons-left has-icons-right">
+                        <input class="input" type="text" placeholder="Name of the videogame" value="{{item.name}}"
+                            id="name" name="name" required>
+                        <span class="icon is-small is-left">
+                            <i class="fas fa-gamepad"></i>
+                        </span>
+                    </div>
+                </div>
+
+                <div class="field">
+                    <label class="label">GENERES</label>
+                    <div class="control has-icons-left has-icons-right">
+                        <input class="input" type="text" placeholder="Generes of the game, separate by space"
+                            value="{{item.genres}}" id="genres" name="genres">
+                        <span class="icon is-small is-left">
+                            <i class="fas fa-tags"></i>
+                        </span>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <div class="field is-horizontal">
+            <div class="field-body">
+
+                <div class="field">
+                    <label class="label">MAX PRICE</label>
+                    <div class="control has-icons-left has-icons-right">
+                        <input class="input" type="number" placeholder="Real price of the game" value="{{item.price}}"
+                            id="price" name="price" required>
+                        <span class="icon is-small is-left">
+                            <i class="fas fa-dollar-sign"></i>
+                        </span>
+                    </div>
+                </div>
+
+                <div class="field">
+                    <label class="label">LOWER PRICE</label>
+                    <div class="control has-icons-left has-icons-right">
+                        <input class="input" type="number" placeholder="Lower all time sale price of the game"
+                            value="{{item.lowest}}" id="lowest" name="lowest">
+                        <span class="icon is-small is-left">
+                            <i class="fas fa-dollar-sign"></i>
+                        </span>
+                    </div>
+                </div>
+
+                <div class="field">
+                    <label class="label">STATUS</label>
+                    {% if item.status %}
+                    <label class="checkbox">
+                        <input type="checkbox" checked name="status" id="status">
+                        GAME OWNED
+                    </label>
+                    {% else %}
+                    <label class="checkbox">
+                        <input type="checkbox" name="status" id="status">
+                        GAME OWNED
+                    </label>
+                    {% endif %}
+                </div>
+
+            </div>
+        </div>
+
+        <div class="field is-horizontal">
+            <div class="field-body">
+
+                <div class="field">
+                    <label class="label">URL STEAM PAGE</label>
+                    <div class="control has-icons-left has-icons-right">
+                        <input class="input" type="text" placeholder="URL from the steam page of the game"
+                            value="{{item.page}}" id="page" name="page">
+                        <span class="icon is-small is-left">
+                            <i class="fas fa-link"></i>
+                        </span>
+                    </div>
+                </div>
+
+                <div class="field">
+                    <label class="label">URL IMG</label>
+                    <div class="control has-icons-left has-icons-right">
+                        <input class="input" type="text"
+                            placeholder="URL from the thumbnail image of the game, from steam" value="{{item.img}}"
+                            id="img" name="img">
+                        <span class="icon is-small is-left">
+                            <i class="fas fa-link"></i>
+                        </span>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <div class="field is-horizontal">
+            <div class="field-body">
+
+                <div class="field">
+                    <label class="label">API PASSWORD</label>
+                    <div class="control has-icons-left has-icons-right">
+                        <input class="input is-primary" type="password" placeholder="API password" value=""
+                            id="password" name="password">
+                        <span class="icon is-small is-left">
+                            <i class="fas fa-key"></i>
+                        </span>
+                    </div>
+                </div>
+
+                <div class="field"></div>
+                <div class="field"></div>
+
+            </div>
+        </div>
+
+        <button class="button is-primary" type="submit">
+            <span class="icon">
+                <i class="far fa-edit"></i>
+            </span>
+            <span>SUBMIT</span>
+        </button>
+
+    </form>
+
+</section>
+
+<script>
+
+    async function submitFunction(e) {
+        e.preventDefault();
+
+        let key = document.getElementById('item_key').value;
+        let password = document.getElementById('password').value || '';
+
+
+        let json = {
+            name: document.getElementById('name').value || '',
+            genres: document.getElementById('genres').value || '',
+            price: document.getElementById('price').value || 0,
+            lowest: document.getElementById('lowest').value || 0,
+            status: document.getElementById('status').checked ? true : false,
+            page: document.getElementById('page').value || '',
+            img: document.getElementById('img').value || '',
+        }
+
+        let response = await fetch(`/edit/${key}`, {
+            method: 'PUT',
+            body: JSON.stringify(json),
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+                'password': password,
+            },
+        });
+
+        let result = await response.json();
+        if(result.status) window.location = `/tracker/?result=${result.status}`;
+        else  window.location = `/tracker/?result=404`;
+
+        return false;
+    }
+
+
+</script>
+
+{% endblock %}
